@@ -1,115 +1,116 @@
-# Serie "Visagismo" — 6 reels para conseguir clientes (y alumnos)
+# Serie "Visagismo" · @angelpz.cutz
 
-Videos en `videos/` (1080x1920, 30 fps, 34–37 s, sin voz). Cada uno sigue la misma estructura:
+6 reels verticales (1080x1920) para conseguir clientes en la 6ta Sección de Mendoza y mostrar que das cursos.
+Cada uno combina forma de rostro, tipo de pelo y cráneo, cierra con un corte real tuyo y con el llamado a la acción
+(palabra clave por DM + dirección).
 
-| Tiempo | Escena | Objetivo |
-|---|---|---|
-| 0–3,5 s | Gancho | Frenar el scroll: "esto te pasa a vos" |
-| 3,5–9,5 s | El error | Mostrar el corte que NO va (rojo) |
-| 9,5–15,5 s | Diagnóstico | Que la persona se identifique con su forma |
-| 15,5–26 s | Solución | 4 claves = valor real, te posiciona como experto |
-| 26–30,5 s | Antes / después | Prueba visual |
-| 30,5–36,5 s | Llamado a la acción | Turno por DM + mención del curso |
+La locución está escrita en tu estilo: gancho directo, "quedate que te enseño", paso a paso
+("primero que nada", "luego de esto") y cierre con "escribime" / "dale like y seguime".
 
-**Cómo grabar la voz:** abrí el video en CapCut (o en el editor de IG/TikTok), grabá la locución
-leyendo el guion de abajo; cada bloque dura lo mismo que su escena. Hablá rápido y con energía,
-como si le explicaras a un cliente en el sillón. Si usás un clon de tu voz (ElevenLabs, CapCut "voz
-personalizada"), pegá el guion tal cual.
-
-Para poner tu @ y tu barrio en pantalla, volvé a generar los videos con:
+## Cómo regenerar
 
 ```bash
-python3 generar_reels.py --handle @tubarberia --zona "Tu barrio"
+# 1) voz clonada (ver clonar_voz.py para los modelos)
+python3 clonar_voz.py --ref tu_audio.mp3 --ref-hasta 74 --models DIR_MODELOS
+# 2) videos con voz, tus cortes (carpeta material/) y tus datos
+python3 generar_reels.py --voz voz
 ```
 
----
+Si preferís grabar vos la voz: generá sin `--voz`, abrí el video en CapCut y leé cada bloque en su escena.
 
-## 1 · Cara redonda + pelo lacio — palabra clave TURNO
 
-| Escena | Locución |
-|---|---|
-| Gancho | "Si tenés la cara redonda, dejá de pedir este corte." |
-| Error | "Flequillo recto y volumen a los costados: sumás ancho justo donde ya sobra, y la cara se ve todavía más redonda." |
-| Diagnóstico | "¿Cómo sabés si sos redondo? Tu cara es casi igual de ancha que de larga, y la mandíbula es suave, sin ángulo." |
-| Solución | "Lo que te favorece: volumen arriba para estirar la cara, costados bajos con un degradé medio, y como el pelo lacio se cae, lo texturizo para que se sostenga. Y una barba corta que marque ángulo." |
-| Antes/después | "Mismo pibe, otro corte." |
-| CTA | "Antes de agarrar la máquina, analizo tu rostro y elegimos el corte juntos. Escribime TURNO por privado." |
-
-**Caption:** ¿Cara redonda? El problema no es tu cara, es el corte 👇 Guardalo y mostráselo a tu barbero (o vení y lo hacemos juntos). Escribime TURNO por DM.
-
-## 2 · Cráneo plano (occipital) + pelo grueso — palabra clave CRÁNEO
+## 01 · Cara redonda + pelo lacio — palabra clave TURNO
 
 | Escena | Locución |
 |---|---|
-| Gancho | "Tu degradé alto te está delatando." |
-| Diagnóstico | "Mirate de costado. Si atrás la cabeza cae recta, tenés el occipital plano. Es re común, a la mayoría le pasa." |
-| Error | "Cuando te rapan alto, esa parte plana queda a la vista y la cabeza se ve cuadrada de perfil." |
-| Solución | "La solución es dejar peso atrás: degradé bajo en la nuca, tijera en la coronilla para dar curva, y si tenés pelo grueso, se desmecha, no se rapa. El corte dibuja la forma que tu cabeza no tiene." |
-| Resultado | "Ahora la cabeza se ve redonda. Eso es visagismo." |
-| CTA | "¿Te pasa esto? Vení y lo vemos. Escribime CRÁNEO por privado." |
+| Gancho | ¿Cara redonda? Quedate, que te enseño qué corte no pedir. |
+| El error | Flequillo recto y volumen en los laterales: sumás ancho justo donde ya sobra. |
+| Diagnóstico | Primero que nada, mirá: si el largo y el ancho son casi iguales, y la mandíbula es suave, es redonda. |
+| Solución | Luego de esto: volumen arriba para alargar, laterales bajos con degradé medio, al cabello lacio lo texturizamos para que se sostenga, y una barba que marque ángulo. |
+| Antes / después | Mirá el cambio. Mismo cliente, otro corte. |
+| Trabajo real | Así queda en mi sillón: textura arriba y laterales bajos. |
+| Llamado a la acción | Estoy en la sexta sección de Mendoza. Escribime TURNO y analizo tu rostro antes de cortar. |
 
-**Caption:** Sacate una foto de perfil y fijate 👀 Si atrás es plano, NO te rapes alto. Escribime CRÁNEO y te digo qué corte te va.
+**Caption:** ¿Cara redonda? El problema no es tu cara, es el corte 👇 Guardalo. Turnos en 6ta Sección, Mendoza (Olascoaga 1978). Escribime TURNO por DM.
 
-## 3 · Cara alargada + pelo ondulado — palabra clave TURNO
-
-| Escena | Locución |
-|---|---|
-| Gancho | "Si tenés la cara larga, nunca pidas esto." |
-| Error | "Más altura arriba es igual a una cara más larga. La pompa alta con los costados al cero te estira todavía más." |
-| Diagnóstico | "Cara alargada: el largo le gana claramente al ancho y la frente suele ser alta." |
-| Solución | "Lo que te favorece: altura moderada, costados con algo de largo, un flequillo ondulado hacia adelante que acorte la frente, y aprovechar la onda natural en vez de plancharla." |
-| Antes/después | "Se ve más proporcionado al toque." |
-| CTA | "Tu cara tiene su corte. Antes de cortar analizo tu rostro y lo elegimos juntos. Escribime TURNO." |
-
-**Caption:** Cara larga + pompa alta = error clásico. Mirá cómo se equilibra 👇 Turnos por DM: escribí TURNO.
-
-## 4 · Cara cuadrada + pelo rizado — palabra clave RULOS
+## 02 · Cráneo plano (occipital) + pelo grueso — palabra clave CRÁNEO
 
 | Escena | Locución |
 |---|---|
-| Gancho | "Cara cuadrada y rulos: tenés el combo ganador…" |
-| Error | "…si no te hacen el hongo: costados al cero con una línea dura y la bola arriba. Error." |
-| Diagnóstico | "¿Cómo sabés si es cuadrada? Frente y mandíbula anchas, casi rectas." |
-| Solución | "Se hace así: taper suave en sienes y nuca, rulos definidos, nunca aplastados, forma redondeada arriba, y una barba perfilada que marque esa mandíbula." |
-| Antes/después | "Los rulos se respetan, no se esconden." |
-| CTA | "¿Tenés rulos? Te los dejo como tienen que estar. Escribime RULOS por privado." |
+| Gancho | Tu degradé alto te está delatando. Quedate que te explico. |
+| El error | Primero que nada, mirate de costado: si atrás la cabeza cae recta, tenés el occipital plano. |
+| Diagnóstico | Cuando rapamos alto, esa parte plana queda a la vista. |
+| Solución | La solución es dejar peso atrás: degradé bajo en la nuca, tijera en la coronilla para generar curva, y al cabello grueso lo desmechamos, no lo rapamos. |
+| Antes / después | Y ahora la cabeza se ve redonda. Eso es visagismo. |
+| Trabajo real | Así trabajo la nuca: degradé bajo y peso arriba. |
+| Llamado a la acción | ¿Te pasa esto? Estoy en la sexta sección de Mendoza. Escribime CRÁNEO y lo vemos en el sillón. |
 
-**Caption:** Los rulos no se rapan, se trabajan 🌀 Si tenés pelo rizado escribime RULOS y te paso turno.
+**Caption:** Sacate una foto de perfil y fijate 👀 Si atrás es plano, NO te rapes alto. Escribime CRÁNEO y lo vemos. 📍 Olascoaga 1978, 6ta Sección, Mendoza.
 
-## 5 · Entradas + rostro corazón + pelo fino — palabra clave TURNO
-
-| Escena | Locución |
-|---|---|
-| Gancho | "¿Tenés entradas? Este corte las disimula." |
-| Error | "Peinarte para atrás las expone: frente ancha más entradas a la vista es igual a frente gigante." |
-| Diagnóstico | "Rostro corazón: frente ancha y mentón finito. Pasa muchísimo en los que tienen entradas." |
-| Solución | "Lo que funciona: crop texturizado hacia adelante, flequillo corto e irregular, al pelo fino le doy textura con tijera para que gane cuerpo, y una barba que le dé peso al mentón." |
-| Antes/después | "Las entradas no se ven. Y no es magia." |
-| CTA | "Las entradas se trabajan, no se esconden con gorra. Escribime TURNO por privado." |
-
-**Caption:** ¿Entradas? Antes de raparte todo, probá esto 👇 Escribime TURNO.
-
-## 6 · Las 3 cosas que mira un barbero que sabe (rostro diamante + cráneo largo) — palabra clave CURSO
+## 03 · Cara alargada + pelo ondulado — palabra clave TURNO
 
 | Escena | Locución |
 |---|---|
-| Gancho | "Tres cosas que mira un barbero que sabe… y que casi nadie te enseña." |
-| 1 Rostro | "Uno: la forma del rostro. En un rostro diamante los pómulos son anchos; si rapás los costados, los exagerás." |
-| 2 Cráneo | "Dos: la forma del cráneo. Si la cabeza es larga atrás, el degradé se sube un poco más para equilibrar." |
-| 3 Pelo | "Tres: el tipo de pelo. Lacio, ondulado, rizado, fino o grueso: cada uno se corta distinto." |
-| Fórmula | "Rostro más cráneo más pelo es igual a tu corte. Eso es visagismo, y se aprende." |
-| CTA | "¿Querés cortar así? Doy cursos de barbería con visagismo desde cero, en grupos chicos y con práctica real. Escribime CURSO. Y si solo querés un buen corte, reservá tu turno." |
+| Gancho | ¿Cara larga? Quedate, que te enseño qué nunca pedir. |
+| El error | Más altura arriba, cara más larga. La pompa alta con laterales al cero te estira todavía más. |
+| Diagnóstico | Primero que nada: si el largo le gana claramente al ancho, y la frente es alta, es alargada. |
+| Solución | Luego de esto: altura moderada, laterales con algo de largo, un flequillo ondulado hacia adelante, y aprovechamos la onda natural del cabello. |
+| Antes / después | Mirá cómo queda más proporcionado. |
+| Trabajo real | Así queda en mi sillón: flequillo hacia adelante y altura justa. |
+| Llamado a la acción | Tu cara tiene su corte. Estoy en la sexta sección de Mendoza. Escribime TURNO y lo elegimos juntos. |
 
-**Caption:** Lo que te diferencia de otro barbero no es la máquina, es el ojo 👁️ Cursos de barbería con visagismo. Escribí CURSO por DM y te paso la info.
+**Caption:** Cara larga + pompa alta = error clásico. Mirá cómo se equilibra 👇 Turnos por DM: escribí TURNO. 📍 6ta Sección, Mendoza.
+
+## 04 · Cara cuadrada + rulos — palabra clave RULOS
+
+| Escena | Locución |
+|---|---|
+| Gancho | Cara cuadrada y rulos: el combo ganador... |
+| El error | ...si no te hacen el hongo: laterales al cero con línea dura, y la bola arriba. |
+| Diagnóstico | Primero que nada: si la frente y la mandíbula son anchas y casi rectas, es cuadrada. |
+| Solución | Luego de esto: taper suave en sienes y nuca, rulos definidos, nunca aplastados, forma redondeada arriba, y una barba perfilada que marque la mandíbula. |
+| Antes / después | Los rulos se respetan, no se esconden. |
+| Trabajo real | Así quedan los rulos en mi sillón: taper y barba perfilada. |
+| Llamado a la acción | ¿Tenés rulos? Estoy en la sexta sección de Mendoza. Escribime RULOS y seguime para más. |
+
+**Caption:** Los rulos no se rapan, se trabajan 🌀 Escribime RULOS y te paso turno. 📍 Olascoaga 1978, 6ta Sección, Mendoza.
+
+## 05 · Entradas + rostro corazón + pelo fino — palabra clave TURNO
+
+| Escena | Locución |
+|---|---|
+| Gancho | ¿Tenés entradas? Quedate, que este corte las disimula. |
+| El error | Peinar todo hacia atrás las expone, y la frente se ve gigante. |
+| Diagnóstico | Rostro corazón: frente ancha y mentón finito. Es muy común con entradas. |
+| Solución | Luego de esto: crop texturizado hacia adelante, flequillo corto e irregular, al cabello fino le damos textura con tijera, y una barba que le dé peso al mentón. |
+| Antes / después | Las entradas no se ven. Y no es magia. |
+| Trabajo real | Así queda en mi sillón: crop con flequillo, y las entradas ni se notan. |
+| Llamado a la acción | Las entradas se trabajan, no se esconden con gorra. Estoy en la sexta sección de Mendoza. Escribime TURNO. |
+
+**Caption:** ¿Entradas? Antes de raparte todo, probá esto 👇 Escribime TURNO. 📍 6ta Sección, Mendoza.
+
+## 06 · 3 cosas que mira un barbero que sabe (diamante + cráneo largo) — palabra clave CURSO
+
+| Escena | Locución |
+|---|---|
+| Gancho | Si querés que tu cliente pase de esto a esto, quedate: tres cosas que mira un barbero que sabe. |
+| 1 · Rostro | Uno: la forma del rostro. En un rostro diamante, si rapás los laterales, exagerás los pómulos. |
+| 2 · Cráneo | Dos: el cráneo. Si es largo atrás, subimos un poco el degradé para equilibrar. |
+| 3 · Cabello | Tres: el tipo de cabello. Lacio, ondulado, rizado, fino o grueso: cada uno se corta distinto. |
+| Fórmula | Rostro, cráneo y cabello: eso es visagismo. Y se aprende. |
+| Cortes reales (montaje) | Estos son cortes míos. Y esto es lo que vas a aprender. |
+| Llamado a la acción | Doy cursos de barbería desde cero, en grupos chicos y con práctica real, en la sexta sección de Mendoza. Escribime CURSO. Dale like y seguime para el próximo video. |
+
+**Caption:** Lo que te diferencia de otro barbero no es la máquina, es el ojo 👁️ Cursos de barbería con visagismo en Mendoza. Escribí CURSO por DM y te paso la info.
 
 ---
 
 ## Cómo publicar para conseguir clientes (no solo views)
 
 - **Orden:** 1 → 2 → 4 → 3 → 5 → 6, uno cada 2 días. El 6 (curso) va último, cuando ya hay confianza.
-- **Ubicación:** etiquetá siempre la ubicación de la barbería; es lo que hace que te vea gente de tu zona.
-- **Hashtags (3–5, locales):** `#barberia[tuciudad]` `#barbero[tubarrio]` `#visagismo` `#cortedepelohombre`.
-- **Palabra clave por DM:** respondé cada mensaje en menos de 1 hora con el link de turnos. Ese DM es el cliente.
-- **Comentarios:** fijá un comentario tuyo: "¿Qué forma de cara tenés? Te digo qué corte te va 👇". Contestá todos.
-- **Historias:** compartí cada reel en historias con sticker de link a turnos el mismo día.
-- **Audio:** si no usás tu voz, poné un audio en tendencia bajo; con voz, música muy suave de fondo.
+- **Ubicación:** etiquetá siempre "6ta Sección, Mendoza" / la barbería: es lo que hace que te vea gente de la zona.
+- **Hashtags (3–5, locales):** `#barberiamendoza` `#barberomendoza` `#mendoza` `#visagismo` `#cortedepelohombre`.
+- **Palabra clave por DM:** respondé cada mensaje en menos de 1 hora con turno y dirección. Ese DM es el cliente.
+- **Comentarios:** fijá uno tuyo: "¿Qué forma de cara tenés? Te digo qué corte te va 👇" y contestá todos.
+- **Historias:** compartí cada reel en historias el mismo día con sticker de ubicación y link a turnos.
+- **Audio:** sumá un tema en tendencia muy bajito (10–15 %) debajo de la voz desde Instagram/TikTok.

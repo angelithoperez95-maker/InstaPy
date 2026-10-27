@@ -4,7 +4,7 @@
 Uso:
     python3 generar_reels.py                       # renderiza los 6 videos en ./videos
     python3 generar_reels.py --solo 1 3            # solo los videos 1 y 3
-    python3 generar_reels.py --handle @tubarberia --zona "Palermo, CABA"
+    python3 generar_reels.py --handle @angelpz.cutz --zona "6ta Sección · Mendoza" --direccion "Olascoaga 1978"
     python3 generar_reels.py --preview             # exporta un PNG por escena para revisar
     python3 generar_reels.py --voz voz             # con la locución clonada (ver clonar_voz.py)
 
@@ -18,7 +18,7 @@ import subprocess
 import wave
 from functools import lru_cache
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 W, H, FPS = 1080, 1920, 30
 SS = 2  # supersampling para los trazos vectoriales
@@ -37,7 +37,9 @@ F_BLACK = FONT_DIR + "InterDisplay-Black.otf"
 F_BOLD = FONT_DIR + "InterDisplay-Bold.otf"
 F_SEMI = FONT_DIR + "Inter-SemiBold.otf"
 
-OPTS = {"handle": "", "zona": "", "voz": ""}
+OPTS = {"handle": "", "zona": "", "direccion": "", "voz": ""}
+HERE = os.path.dirname(os.path.abspath(__file__))
+MATERIAL = os.path.join(HERE, "material")
 
 
 # ---------------------------------------------------------------- utilidades
@@ -628,8 +630,8 @@ def chrome(frame, T, total, idx, n_total):
     chip = pill(f"VISAGISMO  ·  {idx}/{n_total}", GOLD, size=30)
     frame.alpha_composite(chip, ((W - chip.width) // 2, 70))
     if OPTS["handle"]:
-        t = text_img(OPTS["handle"], 34, max_w=600, color=MUTED, fpath=F_SEMI)
-        frame.alpha_composite(t, ((W - t.width) // 2, 1620))
+        t = text_img(OPTS["handle"], 32, max_w=600, color=MUTED, fpath=F_SEMI)
+        frame.alpha_composite(t, ((W - t.width) // 2, 112))
 
 
 # ---------------------------------------------------------------- escenas reutilizables
@@ -640,8 +642,8 @@ SUB_Y = 1520
 
 def sc_hook(lines, shape, style=None, color=RED, beard=None, stamp_kind="x"):
     def f(fr, t, dur):
-        put(fr, text_img(lines, 92, upper=True), W / 2, TITLE_Y, t, 0.0, "slam", 0.25)
-        put_face(fr, W / 2, VIS_Y + 40, shape=shape, S=230, style=style, hair_color=color,
+        put(fr, text_img(lines, 92, upper=True), W / 2, TITLE_Y + 50, t, 0.0, "slam", 0.25)
+        put_face(fr, W / 2, VIS_Y + 90, shape=shape, S=230, style=style, hair_color=color,
                  outline_p=ease_out(prog(t, 0.1, 0.7)), hair_p=prog(t, 0.6, 0.6), beard=beard)
         if stamp_kind and t > 1.3:
             put(fr, stamp(stamp_kind), W / 2 + 270, VIS_Y - 170, t, 1.3, "slam", 0.2)
@@ -716,13 +718,80 @@ def sc_cta(main, offer, second, keyword):
         put(fr, text_img(main, 84), W / 2, 520, t, 0.0, "slam", 0.25)
         put(fr, text_img(offer, 54, fpath=F_BOLD), W / 2, 850, t, 0.5, "up")
         if OPTS["zona"]:
-            put(fr, pill("TURNOS EN " + OPTS["zona"].upper(), WHITE, size=36), W / 2, 1010, t, 0.8, "pop")
+            put(fr, pill(OPTS["zona"].upper(), WHITE, size=36), W / 2, 1010, t, 0.8, "pop")
         pulse = 1 + 0.05 * math.sin(max(0, t - 1.1) * 7)
         btn = pill(f"ESCRIBÍ  \"{keyword}\"  POR DM", GOLD, size=54)
         if t > 1.1:
             btn = btn.resize((int(btn.width * pulse), int(btn.height * pulse)), Image.BILINEAR)
         put(fr, btn, W / 2, 1170, t, 1.1, "pop")
-        put(fr, text_img(second, 44, color=MUTED, fpath=F_SEMI, hl=WHITE), W / 2, 1400, t, 1.8, "up")
+        if OPTS["direccion"] or OPTS["handle"]:
+            loc = "  ·  ".join(x for x in (OPTS["direccion"], OPTS["handle"]) if x)
+            put(fr, text_img(loc, 46, fpath=F_BOLD, color=GOLD), W / 2, 1300, t, 1.4, "up")
+        put(fr, text_img(second, 44, color=MUTED, fpath=F_SEMI, hl=WHITE), W / 2, 1440, t, 1.8, "up")
+    return f
+
+
+# ---------------------------------------------------------------- material real (videos / fotos del barbero)
+CARD_W, CARD_H = 780, 1170
+
+
+@lru_cache(maxsize=4)
+def media_frames(name, w=CARD_W, h=CARD_H):
+    path = os.path.join(MATERIAL, name)
+    if name.lower().endswith((".jpg", ".jpeg", ".png")):
+        img = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
+        return [ImageOps.fit(img, (int(w * 1.15), int(h * 1.15)), Image.LANCZOS)]
+    raw = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", path, "-vf",
+                          f"fps={FPS},scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}",
+                          "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+    n = len(raw) // (w * h * 3)
+    return [Image.frombuffer("RGB", (w, h), raw[i * w * h * 3:(i + 1) * w * h * 3]) for i in range(n)]
+
+
+@lru_cache(maxsize=1)
+def card_mask():
+    m = Image.new("L", (CARD_W * 2, CARD_H * 2), 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, CARD_W * 2 - 1, CARD_H * 2 - 1], radius=80, fill=255)
+    return m.resize((CARD_W, CARD_H), Image.LANCZOS)
+
+
+def media_at(name, t, dur):
+    frames = media_frames(name)
+    if len(frames) == 1:  # foto: zoom lento (Ken Burns)
+        z = 1.15 - 0.12 * clamp(t / max(dur, 0.1))
+        big = frames[0]
+        cw, ch = int(CARD_W * z), int(CARD_H * z)
+        x0, y0 = (big.width - cw) // 2, (big.height - ch) // 2
+        return big.crop((x0, y0, x0 + cw, y0 + ch)).resize((CARD_W, CARD_H), Image.BILINEAR)
+    i = int(t * FPS)
+    n = len(frames)
+    i %= 2 * n - 2  # ida y vuelta para que no corte
+    return frames[i if i < n else 2 * n - 2 - i]
+
+
+def sc_real(media, title, tag="TRABAJO REAL"):
+    """Muestra cortes reales del barbero en una tarjeta. media: archivo o lista (montaje)."""
+    items = [media] if isinstance(media, str) else list(media)
+    if not all(os.path.exists(os.path.join(MATERIAL, m)) for m in items):
+        return None
+
+    def f(fr, t, dur):
+        put(fr, text_img(title, 74), W / 2, 250, t, 0.0, "pop")
+        seg = dur / len(items)
+        k = min(len(items) - 1, int(t // seg))
+        img = media_at(items[k], t - k * seg, seg).convert("RGBA")
+        img.putalpha(card_mask())
+        p = ease_out(prog(t, 0.0, 0.4))
+        card = Image.new("RGBA", (CARD_W + 16, CARD_H + 16), (0, 0, 0, 0))
+        ImageDraw.Draw(card).rounded_rectangle([0, 0, CARD_W + 15, CARD_H + 15], radius=48, fill=GOLD + (255,))
+        card.alpha_composite(img, (8, 8))
+        sc = 0.9 + 0.1 * p
+        if sc < 0.999:
+            card = card.resize((int(card.width * sc), int(card.height * sc)), Image.BILINEAR)
+        cy = 990
+        fr.alpha_composite(with_alpha(card, p), (int(W / 2 - card.width / 2), int(cy - card.height / 2)))
+        label = tag + ("  ·  " + OPTS["handle"] if OPTS["handle"] else "")
+        put(fr, pill(label, GOLD, size=34), W / 2, cy + CARD_H / 2 - 50, t, 0.5, "pop")
     return f
 
 
@@ -747,11 +816,12 @@ def serie():
                 "Barba corta que *marque ángulo*"], "redondo", "quiff", beard="perfilada")),
             (4.5, sc_before_after("redondo", "bowl", "quiff", good_beard="perfilada",
                                   sub="Mismo pibe. *Otro corte.*")),
+            (4.5, sc_real("crop_textura.mov", "Así queda en *mi sillón*")),
             (6.0, sc_cta("¿Querés el corte que va con *tu cara*?", CTA_CLIENTE, CTA_CURSO, "TURNO")),
         ]),
         dict(slug="02_craneo_plano_degrade", scenes=[
-            (3.5, lambda fr, t, d: (put(fr, text_img("Tu degradé alto te está *delatando*", 92, upper=True), W / 2, TITLE_Y, t, 0, "slam", 0.25),
-                                    put_profile(fr, W / 2, VIS_Y + 30, "plano", S=300, outline_p=ease_out(prog(t, 0.1, 0.8)),
+            (3.5, lambda fr, t, d: (put(fr, text_img("Tu degradé alto te está *delatando*", 92, upper=True), W / 2, TITLE_Y + 50, t, 0, "slam", 0.25),
+                                    put_profile(fr, W / 2, VIS_Y + 90, "plano", S=300, outline_p=ease_out(prog(t, 0.1, 0.8)),
                                                 hair="fade_alto", hair_p=prog(t, 0.7, 0.6), mark="plano" if t > 1.4 else None))),
             (6.0, sc_profile("Mirate de *costado*", "Si atrás tu cabeza cae *recta*, tenés el occipital plano. Es re común.",
                              "plano", mark="plano")),
@@ -765,6 +835,7 @@ def serie():
                                         "Pelo grueso: *desmechar*, no rapar", "El corte *dibuja* la cabeza que no tenés"])])),
             (4.5, sc_profile("Ahora la cabeza se ve *redonda*", "Esto es *visagismo*: cortar para tu cráneo, no para la foto.",
                              "plano", hair="peso_atras", show_ideal=True, stamp_kind="ok", sub_t=0.6)),
+            (4.5, sc_real("nuca_diseno.jpg", "Así trabajo *la nuca*")),
             (6.0, sc_cta("¿Te pasa esto? *Vení y lo vemos.*", CTA_CLIENTE, CTA_CURSO, "CRÁNEO")),
         ]),
         dict(slug="03_cara_alargada_pelo_ondulado", scenes=[
@@ -780,6 +851,7 @@ def serie():
                 "Aprovechá la *onda natural*"], "alargado", "ondulado", beard="corta")),
             (4.5, sc_before_after("alargado", "pompa_alta", "ondulado", good_beard="corta",
                                   sub="Se ve *más proporcionado* al toque.")),
+            (4.5, sc_real("flequillo_adelante.mov", "Así queda en *mi sillón*")),
             (6.0, sc_cta("Tu cara tiene *su* corte.", CTA_CLIENTE, CTA_CURSO, "TURNO")),
         ]),
         dict(slug="04_cara_cuadrada_pelo_rizado", scenes=[
@@ -796,6 +868,7 @@ def serie():
                 "Barba perfilada que *marque* la mandíbula"], "cuadrado", "rizos_taper", beard="perfilada")),
             (4.5, sc_before_after("cuadrado", "rizos_hongo", "rizos_taper", good_beard="perfilada",
                                   sub="Los rulos *se respetan*, no se esconden.")),
+            (4.5, sc_real("rulos_barba.mov", "Rulos *de verdad*")),
             (6.0, sc_cta("¿Tenés *rulos*? Te los dejo *como tienen que estar.*", CTA_CLIENTE, CTA_CURSO, "RULOS")),
         ]),
         dict(slug="05_entradas_rostro_corazon_pelo_fino", scenes=[
@@ -811,6 +884,7 @@ def serie():
                 "Barba que le dé *peso al mentón*"], "corazon", "crop", beard="menton")),
             (4.5, sc_before_after("corazon", "atras", "crop", good_beard="menton",
                                   sub="Las entradas *no se ven*. Y no es magia.")),
+            (4.5, sc_real("crop_flequillo.mov", "Así queda en *mi sillón*")),
             (6.0, sc_cta("Las entradas *se trabajan*, no se esconden con gorra.", CTA_CLIENTE, CTA_CURSO, "TURNO")),
         ]),
         dict(slug="06_3_cosas_que_mira_un_barbero_curso", scenes=[
@@ -825,6 +899,8 @@ def serie():
                                "diamante", "lado", color=GOLD, stamp_kind="ok")),
             (5.0, lambda fr, t, d: (put(fr, text_img("Rostro + cráneo + pelo =\n*TU* corte", 88), W / 2, 600, t, 0, "pop"),
                                     put(fr, text_img("Eso es *visagismo*. Y se aprende.", 56, fpath=F_BOLD), W / 2, 1050, t, 0.8, "up"))),
+            (6.0, sc_real(["crop_textura.mov", "rulos_barba.mov", "flequillo_adelante.mov", "nuca_diseno.jpg", "crop_taper.mov"],
+                         "Cortes *míos*", tag="ESTO VAS A APRENDER")),
             (7.0, sc_cta("¿Querés cortar *así*?", "Doy *cursos de barbería* con visagismo desde cero. Grupos chicos, práctica real.",
                          "¿Solo querés un buen corte? *Reservá tu turno.*", "CURSO")),
         ]),
@@ -841,7 +917,11 @@ def _read_wav16k(path):
 def voice_track(video, path):
     """Arma la pista de voz y devuelve las duraciones de escena estiradas para que entre cada frase."""
     scenes, durs, clips = video["scenes"], [], []
-    for i, (dur, _) in enumerate(scenes, 1):
+    for i, (dur, fn) in enumerate(scenes, 1):
+        if fn is None:
+            durs.append(0)
+            clips.append(b"")
+            continue
         wp = os.path.join(OPTS["voz"], video["slug"], f"esc{i}.wav") if OPTS["voz"] else ""
         pcm = _read_wav16k(wp) if wp and os.path.exists(wp) else b""
         clips.append(pcm)
@@ -866,7 +946,7 @@ def render(video, idx, n_total, outdir, preview=False):
     scenes = video["scenes"]
     path = os.path.join(outdir, video["slug"] + ".mp4")
     durs, audio = voice_track(video, os.path.join(outdir, video["slug"] + "_voz.wav"))
-    scenes = [(d, fn) for d, (_, fn) in zip(durs, scenes)]
+    scenes = [(d, fn) for d, (_, fn) in zip(durs, scenes) if fn is not None]
     total = sum(d for d, _ in scenes)
     if preview:
         T = 0
@@ -907,12 +987,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--solo", type=int, nargs="*")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "videos"))
-    ap.add_argument("--handle", default="")
-    ap.add_argument("--zona", default="")
+    ap.add_argument("--handle", default="@angelpz.cutz")
+    ap.add_argument("--zona", default="6ta Sección · Mendoza")
+    ap.add_argument("--direccion", default="Olascoaga 1978")
     ap.add_argument("--preview", action="store_true")
     ap.add_argument("--voz", default="", help="carpeta generada por clonar_voz.py (voz/<video>/escN.wav)")
     a = ap.parse_args()
-    OPTS["handle"], OPTS["zona"], OPTS["voz"] = a.handle, a.zona, a.voz
+    OPTS["handle"], OPTS["zona"], OPTS["direccion"], OPTS["voz"] = a.handle, a.zona, a.direccion, a.voz
     os.makedirs(a.out, exist_ok=True)
     vids = serie()
     for i, v in enumerate(vids, 1):
