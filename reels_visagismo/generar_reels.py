@@ -6,6 +6,7 @@ Uso:
     python3 generar_reels.py --solo 1 3            # solo los videos 1 y 3
     python3 generar_reels.py --handle @tubarberia --zona "Palermo, CABA"
     python3 generar_reels.py --preview             # exporta un PNG por escena para revisar
+    python3 generar_reels.py --voz voz             # con la locución clonada (ver clonar_voz.py)
 
 Los videos salen sin locución (pista de audio en silencio) para que encima se grabe
 la voz siguiendo los guiones de GUIONES.md, en CapCut / Instagram / TikTok.
@@ -14,6 +15,7 @@ import argparse
 import math
 import os
 import subprocess
+import wave
 from functools import lru_cache
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -35,7 +37,7 @@ F_BLACK = FONT_DIR + "InterDisplay-Black.otf"
 F_BOLD = FONT_DIR + "InterDisplay-Bold.otf"
 F_SEMI = FONT_DIR + "Inter-SemiBold.otf"
 
-OPTS = {"handle": "", "zona": ""}
+OPTS = {"handle": "", "zona": "", "voz": ""}
 
 
 # ---------------------------------------------------------------- utilidades
@@ -830,10 +832,42 @@ def serie():
 
 
 # ---------------------------------------------------------------- render
+def _read_wav16k(path):
+    with wave.open(path) as w:
+        assert w.getframerate() == 16000 and w.getnchannels() == 1 and w.getsampwidth() == 2, path
+        return w.readframes(w.getnframes())
+
+
+def voice_track(video, path):
+    """Arma la pista de voz y devuelve las duraciones de escena estiradas para que entre cada frase."""
+    scenes, durs, clips = video["scenes"], [], []
+    for i, (dur, _) in enumerate(scenes, 1):
+        wp = os.path.join(OPTS["voz"], video["slug"], f"esc{i}.wav") if OPTS["voz"] else ""
+        pcm = _read_wav16k(wp) if wp and os.path.exists(wp) else b""
+        clips.append(pcm)
+        durs.append(max(dur, round((len(pcm) / 32000 + 0.45) * FPS) / FPS))
+    if not any(clips):
+        return durs, None
+    out = bytearray()
+    for d, pcm in zip(durs, clips):
+        n = int(round(d * 16000)) * 2
+        lead = 3200  # 0,1 s de aire antes de cada frase
+        seg = (bytes(lead) + pcm)[:n]
+        out += seg + bytes(n - len(seg))
+    with wave.open(path, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes(bytes(out))
+    return durs, path
+
+
 def render(video, idx, n_total, outdir, preview=False):
     scenes = video["scenes"]
-    total = sum(d for d, _ in scenes)
     path = os.path.join(outdir, video["slug"] + ".mp4")
+    durs, audio = voice_track(video, os.path.join(outdir, video["slug"] + "_voz.wav"))
+    scenes = [(d, fn) for d, (_, fn) in zip(durs, scenes)]
+    total = sum(d for d, _ in scenes)
     if preview:
         T = 0
         for i, (dur, fn) in enumerate(scenes):
@@ -843,10 +877,11 @@ def render(video, idx, n_total, outdir, preview=False):
             fr.convert("RGB").save(os.path.join(outdir, f"{video['slug']}_esc{i + 1}.png"))
             T += dur
         return
+    audio_in = ["-i", audio] if audio else ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-           "-r", str(FPS), "-i", "-", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
+           "-r", str(FPS), "-i", "-", *audio_in,
            "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-           "-c:a", "aac", "-b:a", "128k", "-shortest", path]
+           "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-ac", "2", "-shortest", path]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     T0 = 0.0
     for dur, fn in scenes:
@@ -863,7 +898,9 @@ def render(video, idx, n_total, outdir, preview=False):
         T0 += dur
     proc.stdin.close()
     proc.wait()
-    print(f"OK {path} ({total:.1f}s)")
+    if audio:
+        os.remove(audio)
+    print(f"OK {path} ({total:.1f}s{', con voz' if audio else ''})")
 
 
 def main():
@@ -873,8 +910,9 @@ def main():
     ap.add_argument("--handle", default="")
     ap.add_argument("--zona", default="")
     ap.add_argument("--preview", action="store_true")
+    ap.add_argument("--voz", default="", help="carpeta generada por clonar_voz.py (voz/<video>/escN.wav)")
     a = ap.parse_args()
-    OPTS["handle"], OPTS["zona"] = a.handle, a.zona
+    OPTS["handle"], OPTS["zona"], OPTS["voz"] = a.handle, a.zona, a.voz
     os.makedirs(a.out, exist_ok=True)
     vids = serie()
     for i, v in enumerate(vids, 1):
