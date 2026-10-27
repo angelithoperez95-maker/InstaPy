@@ -60,9 +60,10 @@ def main():
     ap.add_argument("--ref-hasta", type=float, default=0, help="usar solo los primeros N segundos de la referencia")
     ap.add_argument("--models", required=True)
     ap.add_argument("--out", default=os.path.join(HERE, "voz"))
-    ap.add_argument("--speed", type=float, default=1.08)
-    ap.add_argument("--topk", type=int, default=4)
+    ap.add_argument("--speed", type=float, default=1.0)
+    ap.add_argument("--topk", type=int, default=8)
     ap.add_argument("--solo", type=int, nargs="*")
+    ap.add_argument("--sin-clon", action="store_true", help="solo la voz base, sin convertir a tu voz")
     a = ap.parse_args()
 
     import torch
@@ -71,12 +72,12 @@ def main():
     ref = os.path.join(tmp, "ref16k.wav")
     to16k(a.ref, ref, ["-t", str(a.ref_hasta)] if a.ref_hasta else [])
 
-    vc = load_vc(a.models)
     tts = load_tts(a.models)
+    vc = None if a.sin_clon else load_vc(a.models)
     wav, _ = sf.read(ref, dtype="float32")
     step = 10 * 16000  # en tramos de 10 s para no saturar memoria
     chunks = [torch.from_numpy(wav[i:i + step])[None] for i in range(0, len(wav), step) if len(wav[i:i + step]) > 16000]
-    matching = vc.get_matching_set(chunks)
+    matching = vc.get_matching_set(chunks) if vc else None
 
     for i, (slug, lines) in enumerate(LOCUCION.items(), 1):
         if a.solo and i not in a.solo:
@@ -84,13 +85,18 @@ def main():
         od = os.path.join(a.out, slug)
         os.makedirs(od, exist_ok=True)
         for j, text in enumerate(lines, 1):
-            audio = tts.generate(text, sid=0, speed=a.speed)
+            # palabras clave en mayúscula (TURNO, CURSO) se leen como sigla: pasarlas a minúscula
+            spoken = " ".join(w.lower() if w.isupper() and len(w) > 1 else w for w in text.split())
+            audio = tts.generate(spoken, sid=0, speed=a.speed)
             raw = os.path.join(tmp, "tts.wav")
             sf.write(raw, np.array(audio.samples, dtype=np.float32), audio.sample_rate)
             src = os.path.join(tmp, "tts16k.wav")
             to16k(raw, src)
-            q = vc.get_features(torch.from_numpy(sf.read(src, dtype="float32")[0])[None])
-            out = vc.match(q, matching, topk=a.topk).cpu().numpy()
+            if vc:
+                q = vc.get_features(torch.from_numpy(sf.read(src, dtype="float32")[0])[None])
+                out = vc.match(q, matching, topk=a.topk).cpu().numpy()
+            else:
+                out = sf.read(src, dtype="float32")[0]
             dst = os.path.join(od, f"esc{j}.wav")
             sf.write(os.path.join(tmp, "vc.wav"), out, 16000)
             # recortar silencios de punta y normalizar volumen

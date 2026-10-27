@@ -11,7 +11,7 @@ La locución está escrita en tu estilo: gancho directo, "quedate que te enseño
 
 ```bash
 # 1) voz clonada (ver clonar_voz.py para los modelos)
-python3 clonar_voz.py --ref tu_audio.mp3 --ref-hasta 74 --models DIR_MODELOS
+python3 clonar_voz.py --ref tu_audio.mp3 --ref-hasta 74 --models DIR_MODELOS   # --sin-clon: solo voz base
 # 2) videos con voz, tus cortes (carpeta material/) y tus datos
 python3 generar_reels.py --voz voz
 ```
@@ -93,13 +93,13 @@ Si preferís grabar vos la voz: generá sin `--voz`, abrí el video en CapCut y 
 
 | Escena | Locución |
 |---|---|
-| Gancho | Si querés que tu cliente pase de esto a esto, quedate: tres cosas que mira un barbero que sabe. |
-| 1 · Rostro | Uno: la forma del rostro. En un rostro diamante, si rapás los laterales, exagerás los pómulos. |
+| Gancho | Quedate: tres cosas que mira un barbero que sabe. |
+| 1 · Rostro | Uno: el rostro. En un diamante, si rapás los laterales, exagerás los pómulos. |
 | 2 · Cráneo | Dos: el cráneo. Si es largo atrás, subimos un poco el degradé para equilibrar. |
-| 3 · Cabello | Tres: el tipo de cabello. Lacio, ondulado, rizado, fino o grueso: cada uno se corta distinto. |
+| 3 · Cabello | Tres: el cabello. Lacio, rizado, fino o grueso: cada uno se corta distinto. |
 | Fórmula | Rostro, cráneo y cabello: eso es visagismo. Y se aprende. |
-| Cortes reales (montaje) | Estos son cortes míos. Y esto es lo que vas a aprender. |
-| Llamado a la acción | Doy cursos de barbería desde cero, en grupos chicos y con práctica real, en la sexta sección de Mendoza. Escribime CURSO. Dale like y seguime para el próximo video. |
+| Cortes reales (montaje) | Estos son cortes míos. Esto vas a aprender. |
+| Llamado a la acción | Doy cursos de barbería desde cero, con práctica real, en la sexta sección de Mendoza. Escribime CURSO. |
 
 **Caption:** Lo que te diferencia de otro barbero no es la máquina, es el ojo 👁️ Cursos de barbería con visagismo en Mendoza. Escribí CURSO por DM y te paso la info.
 

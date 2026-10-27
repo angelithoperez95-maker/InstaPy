@@ -925,7 +925,9 @@ def voice_track(video, path):
         wp = os.path.join(OPTS["voz"], video["slug"], f"esc{i}.wav") if OPTS["voz"] else ""
         pcm = _read_wav16k(wp) if wp and os.path.exists(wp) else b""
         clips.append(pcm)
-        durs.append(max(dur, round((len(pcm) / 32000 + 0.45) * FPS) / FPS))
+        # con voz, la escena dura lo que la frase (más un respiro); sin voz, lo que marca la serie
+        need = len(pcm) / 32000 + 0.45
+        durs.append(round(max(2.5, need) * FPS) / FPS if pcm else dur)
     if not any(clips):
         return durs, None
     out = bytearray()

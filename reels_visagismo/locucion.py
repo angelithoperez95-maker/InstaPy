@@ -54,13 +54,12 @@ LOCUCION = {
         "Las entradas se trabajan, no se esconden con gorra. Estoy en la sexta sección de Mendoza. Escribime TURNO.",
     ],
     "06_3_cosas_que_mira_un_barbero_curso": [
-        "Si querés que tu cliente pase de esto a esto, quedate: tres cosas que mira un barbero que sabe.",
-        "Uno: la forma del rostro. En un rostro diamante, si rapás los laterales, exagerás los pómulos.",
+        "Quedate: tres cosas que mira un barbero que sabe.",
+        "Uno: el rostro. En un diamante, si rapás los laterales, exagerás los pómulos.",
         "Dos: el cráneo. Si es largo atrás, subimos un poco el degradé para equilibrar.",
-        "Tres: el tipo de cabello. Lacio, ondulado, rizado, fino o grueso: cada uno se corta distinto.",
+        "Tres: el cabello. Lacio, rizado, fino o grueso: cada uno se corta distinto.",
         "Rostro, cráneo y cabello: eso es visagismo. Y se aprende.",
-        "Estos son cortes míos. Y esto es lo que vas a aprender.",
-        "Doy cursos de barbería desde cero, en grupos chicos y con práctica real, en la sexta sección de Mendoza. "
-        "Escribime CURSO. Dale like y seguime para el próximo video.",
+        "Estos son cortes míos. Esto vas a aprender.",
+        "Doy cursos de barbería desde cero, con práctica real, en la sexta sección de Mendoza. Escribime CURSO.",
     ],
 }
