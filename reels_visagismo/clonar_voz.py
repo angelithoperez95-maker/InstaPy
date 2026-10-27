@@ -73,7 +73,10 @@ def main():
 
     vc = load_vc(a.models)
     tts = load_tts(a.models)
-    matching = vc.get_matching_set([ref])
+    wav, _ = sf.read(ref, dtype="float32")
+    step = 10 * 16000  # en tramos de 10 s para no saturar memoria
+    chunks = [torch.from_numpy(wav[i:i + step])[None] for i in range(0, len(wav), step) if len(wav[i:i + step]) > 16000]
+    matching = vc.get_matching_set(chunks)
 
     for i, (slug, lines) in enumerate(LOCUCION.items(), 1):
         if a.solo and i not in a.solo:
@@ -86,7 +89,7 @@ def main():
             sf.write(raw, np.array(audio.samples, dtype=np.float32), audio.sample_rate)
             src = os.path.join(tmp, "tts16k.wav")
             to16k(raw, src)
-            q = vc.get_features(src)
+            q = vc.get_features(torch.from_numpy(sf.read(src, dtype="float32")[0])[None])
             out = vc.match(q, matching, topk=a.topk).cpu().numpy()
             dst = os.path.join(od, f"esc{j}.wav")
             sf.write(os.path.join(tmp, "vc.wav"), out, 16000)
